@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduBank PR - Painel do Administrador João Paulo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+        }
+
+        :root {
+            --primary: #0f172a;
+            --seed-blue: #0284c7;
+            --success: #16a34a;
+            --danger: #ef4444;
+            --bg: #f1f5f9;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --border: #cbd5e1;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            border: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        .hidden { display: none !important; }
+
+        h2 {
+            margin-bottom: 20px;
+            color: var(--primary);
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        h3 {
+            font-size: 1.1rem;
+            margin: 20px 0 10px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        /* --- PERFIL DO USUÁRIO --- */
+        .profile-box {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .profile-avatar {
+            width: 50px;
+            height: 50px;
+            background: var(--seed-blue);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            font-weight: bold;
+        }
+
+        .profile-info h4 { font-size: 1.1rem; color: var(--primary); }
+        .profile-info p { font-size: 0.85rem; color: #64748b; }
+
+        /* --- FORMULÁRIOS --- */
+        .form-group { margin-bottom: 15px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        label { display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.9rem; }
+        input, select {
+            width: 100%; padding: 10px; border: 1px solid var(--border);
+            border-radius: 6px; font-size: 1rem; background: #fff;
+        }
+        input:focus, select:focus { outline: 2px solid var(--seed-blue); }
+
+        button {
+            width: 100%; padding: 12px; background-color: var(--seed-blue);
+            color: white; border: none; border-radius: 6px; font-size: 1rem;
+            font-weight: bold; cursor: pointer; transition: opacity 0.2s; margin-top: 5px;
+        }
+        button:hover { opacity: 0.9; }
+        button.logout-btn { background-color: #64748b; margin-top: 25px; }
+        button.btn-danger { background-color: var(--danger); }
+
+        /* --- CARDS DE BANCO --- */
+        .balance-card {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: white; padding: 25px; border-radius: 10px; text-align: center; margin-bottom: 20px;
+        }
+        .balance-amount { font-size: 2.8rem; font-weight: bold; margin-top: 5px; color: #38bdf8; }
+
+        /* --- LISTAS E TABELAS --- */
+        .items-list {
+            list-style: none; max-height: 200px; overflow-y: auto;
+            border: 1px solid var(--border); border-radius: 6px; margin-bottom: 15px;
+        }
+        .list-item {
+            padding: 12px; border-bottom: 1px solid #e2e8f0;
+            font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center;
+        }
+        .list-item:last-child { border-bottom: none; }
+
+        .badge {
+            padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; color: white;
+        }
+        .badge-admin { background: #db2777; }
+        .badge-prof { background: #8b5cf6; }
+        .badge-aluno { background: #06b6d4; }
+
+        .hint { font-size: 0.8rem; color: #64748b; text-align: center; margin-top: 15px; line-height: 1.4; }
+    </style>
+</head>
+<body>
+
+    <!-- 1. TELA DE LOGIN INSTITUCIONAL -->
+    <div id="login-screen" class="container">
+        <h2>✨ Conectar ao EduBank PR</h2>
+        <p style="text-align: center; font-size: 0.9rem; margin-bottom: 20px; color:#64748b;">Use suas credenciais @escola.pr.gov.br</p>
+        
+        <form id="login-form">
+            <div class="form-group">
+                <label for="email">E-mail Institucional</label>
+                <input type="email" id="email" required placeholder="exemplo@escola.pr.gov.br">
+            </div>
+            <div class="form-group">
+                <label for="password">Senha</label>
+                <input type="password" id="password" required placeholder="Sua senha">
+            </div>
+            <button type="submit">Entrar com Login Único</button>
+        </form>
+        
+        <div class="hint">
+            <strong>🔑 Contas de Teste Liberadas:</strong><br>
+            • <b>👑 Super Admin:</b> <code>joao.paulo.lima23@escola.pr.gov.br</code> (senha: <code>admin123</code>)<br>
+            • <b>Professor:</b> <code>carlos.silva@escola.pr.gov.br</code> (senha: <code>123</code>) <br>
+            • <b>Aluno:</b> <code>ana.oliveira@escola.pr.gov.br</code> (senha: <code>123</code>)
+        </div>
+    </div>
+
+    <!-- 2. PAINEL SUPER ADMIN (JOÃO PAULO LIMA - LIBERAÇÃO 100%) -->
+    <div id="admin-screen" class="container hidden">
+        <h2>⚙️ Central do Administrador Master</h2>
+        
+        <div class="profile-box">
+            <div class="profile-avatar" id="admin-avatar">J</div>
+            <div class="profile-info">
+                <h4 id="admin-name">Joao Paulo Lima</h4>
+                <p id="admin-email">joao.paulo.lima23@escola.pr.gov.br</p>
+                <span class="badge badge-admin">Acesso Total Liberação 100%</span>
+            </div>
+        </div>
+
+        <h3>👥 Controle Geral de Contas do Colégio</h3>
+        <ul class="items-list" id="admin-users-list"></ul>
+
+        <form id="admin-add-user-form" style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid var(--border);">
+            <strong style="font-size: 0.9rem; display:block; margin-bottom: 10px;">➕ Cadastrar Servidor ou Aluno</strong>
+            <div class="form-group">
+                <input type="email" id="adm-new-email" required placeholder="E-mail (@escola.pr.gov.br)">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <input type="password" id="adm-new-password" required placeholder="Senha de Acesso">
+                </div>
+                <div class="form-group">
+                    <select id="adm-new-role" required>
+                        <option value="student">Papel: Aluno</option>
+                        <option value="teacher">Papel: Professor</option>
+                        <option value="admin">Papel: Administrador</option>
+                    </select>
+                </div>
+            </div>
+            <button type="submit" style="background: var(--success)">Inserir Usuário</button>
+        </form>
+
+        <h3>📜 Histórico Geral de Auditoria (Todas as Transações)</h3>
+        <ul class="items-list" id="admin-global-history"></ul>
+
+        <button class="logout-btn" onclick="logout()">Sair do Sistema</button>
+    </div>
+
+    <!-- 3. PAINEL DO PROFESSOR -->
+    <div id="teacher-screen" class="container hidden">
+        <h2>Painel do Corpo Docente</h2>
+        
+        <div class="profile-box">
+            <div class="profile-avatar" id="teacher-avatar">P</div>
+            <div class="profile-info">
+                <h4 id="teacher-name">Nome Professor</h4>
+                <p id="teacher-email">email@escola.pr.gov.br</p>
+                <span class="badge badge-prof">Professor(a)</span>
+            </div>
+        </div>
+        
+        <form id="transfer-form">
+            <h3>💸 Lançar e Bonificar Pontos</h3>
+            <div class="form-group">
+                <label for="select-student">Selecione o Aluno Destinatário:</label>
+                <select id="select-student" required></select>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="points-amount">Pontuação:</label>
+                    <input type="number" id="points-amount" min="1" required placeholder="Ex: 25">
+                </div>
+                <div class="form-group">
+                    <label for="transfer-reason">Critério/Atividade:</label>
+                    <input type="text" id="transfer-reason" required placeholder="Ex: Nota da Prova">
+                </div>
+            </div>
+            <button type="submit" style="background: var(--success)">Efetuar Depósito</button>
+        </form>
+
+        <button class="logout-btn" onclick="logout()">Sair do Sistema</button>
+    </div>
+
+    <!-- 4. PAINEL DO ALUNO -->
+    <div id="student-screen" class="container hidden">
+        <h2>Área do Estudante</h2>
+        
+        <div class="profile-box">
+            <div class="profile-avatar" id="student-avatar">A</div>
+            <div class="profile-info">
+                <h4 id="student-name">Nome Aluno</h4>
+                <p id="student-email">email@escola.pr.gov.br</p>
+                <span class="badge badge-aluno">Estudante</span>
+            </div>
+        </div>
+
+        <div class="balance-card">
+            <div>Seu Saldo Disponível</div>
+            <div class="balance-amount" id="student-balance">0 pts</div>
+        </div>
+
+        <h3>📜 Extrato Técnico de Depósitos</h3>
+        <ul class="items-list" id="student-history-list"></ul>
+
+        <button class="logout-btn" onclick="logout()">Sair do Sistema</button>
+    </div>
+
+    <script>
+        const defaultDatabase = {
+            "joao.paulo.lima23@escola.pr.gov.br": { role: "admin", pass: "admin123" },
+            "carlos.silva@escola.pr.gov.br": { role: "teacher", pass: "123" },
+            "ana.oliveira@escola.pr.gov.br": { role: "student", pass: "123", balance: 100 }
+        };
+
+        if (!localStorage.getItem('edu_users')) {
+            localStorage.setItem('edu_users', JSON.stringify(defaultDatabase));
+            localStorage.setItem('edu_history', JSON.stringify([]));
+        }
+
+        let sessionUser = null;
+
+        // CAPTURA DO FORMULÁRIO DE LOGIN
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value.trim().toLowerCase();
+            const pass = document.getElementById('password').value;
+
+            if (!email.endsWith('@escola.pr.gov.br')) {
+                alert('Acesso negado. Utilize exclusivamente um e-mail com a terminação @escola.pr.gov.br');
+                return;
+            }
+
+            const users = JSON.parse(localStorage.getItem('edu_users'));
+
+            if (users[email] && users[email].pass === pass) {
+                sessionUser = { email: email, ...users[email], name: convertEmailToName(email) };
+                initSystem();
+            } else {
+                alert('Usuário não localizado ou senha incorreta.');
+            }
+        });
+
+        // MECANISMO DE EXTRAÇÃO DE NOME AUTOMÁTICO DO EMAIL (COM LIMPEZA DE NÚMEROS)
+        function convertEmailToName(email) {
+            let prefix = email.split('@')[0]; // Pega o que está antes do @
+            
+            // Remove qualquer número no final do prefixo (ex: lima23 vira lima)
+            prefix = prefix.replace(/\d+$/, ''); 
+            
+            let parts = prefix.split('.'); // Separa os pontos
+            
+            return parts.map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(' ');
+        }
+
+        // CONTROLADOR DE TELAS
+        function initSystem() {
+            document.getElementById('login-screen').classList.add('hidden');
+            
+            if (sessionUser.role === 'admin') {
+                showAdminPanel();
+            } else if (sessionUser.role === 'teacher') {
+                showTeacherPanel();
+            } else if (sessionUser.role === 'student') {
+                showStudentPanel();
+            }
+        }
+
+        /* --- LÓGICA DA TELA SUPER ADMIN (JOÃO PAULO LIMA) --- */
+        function showAdminPanel() {
+            document.getElementById('admin-screen').classList.remove('hidden');
+            document.getElementById('admin-name').innerText = sessionUser.name;
+            document.getElementById('admin-email').innerText = sessionUser.email;
+            document.getElementById('admin-avatar').innerText = sessionUser.name.charAt(0);
+            renderAdminUserList();
+            renderAdminGlobalHistory();
+        }
+
+        function renderAdminUserList() {
+            const list = document.getElementById('admin-users-list');
+            list.innerHTML = '';
+            const users = JSON.parse(localStorage.getItem('edu_users'));
+
+            for (let email in users) {
+                const u = users[email];
+                const labelName = convertEmailToName(email);
+                let badgeClass = u.role === 'admin' ? 'badge-admin' : (u.role === 'teacher' ? 'badge-prof' : 'badge-aluno');
+                let infoExtra = u.role === 'student' ? ` | <b>${u.balance} pts</b>` : '';
+
+                let delBtn = email === sessionUser.email 
+                    ? '<small>(Você)</small>' 
+                    : `<button class="btn-danger" style="padding:4px 8px; font-size:0.75rem; width:auto;" onclick="adminDeleteUser('${email}')">Excluir</button>`;
+
+                list.innerHTML += `
+                    <li class="list-item">
+                        <div>
+                            <strong>${labelName}</strong> <span class="badge ${badgeClass}">${u.role.toUpperCase()}</span><br>
+                            <span style="font-size:0.75rem; color:#64748b;">${email} ${infoExtra}</span>
+                        </div>
+                        ${delBtn}
+                    </li>
+                `;
+            }
+        }
+
+        function renderAdminGlobalHistory() {
+            const list = document.getElementById('admin-global-history');
+            list.innerHTML = '';
+            const history = JSON.parse(localStorage.getItem('edu_history'));
+
+            if (history.length === 0) {
+                list.innerHTML = '<li class="list-item">Nenhuma transação efetuada na rede escolar.</li>';
+                return;
+            }
+
+            history.reverse().forEach(item => {
+                list.innerHTML += `
+                    <li class="list-item" style="font-size:0.8rem;">
+                        <div>
+                            De: <b>${item.from}</b> <br> Para: <b>${convertEmailToName(item.to)}</b><br>
+                            <small style="color:#64748b;">Motivo: ${item.reason}</small>
+                        </div>
+                        <div style="text-align:right; color:var(--success); font-weight:bold;">+${item.amount} pts<br><span style="font-weight:normal; font-size:0.7rem; color:#64748b">${item.date}</span></div>
+                    </li>
+                `;
+            });
+        }
+
+        document.getElementById('admin-add-user-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const newEmail = document.getElementById('adm-new-email').value.trim().toLowerCase();
+            const newPass = document.getElementById('adm-new-password').value;
+            const newRole = document.getElementById('adm-new-role').value;
+
+            if (!newEmail.endsWith('@escola.pr.gov.br')) {
+                alert('Erro: Contas novas precisam conter o sufixo @escola.pr.gov.br');
+                return;
+            }
+
+            const users = JSON.parse(localStorage.getItem('edu_users'));
+            if (users[newEmail]) {
+                alert('Este e-mail institucional já está cadastrado.');
+                return;
+            }
+
+            users[newEmail] = { role: newRole, pass: newPass };
+            if (newRole === 'student') users[newEmail].balance = 0;
+
+            localStorage.setItem('edu_users', JSON.stringify(users));
+            alert(`Usuário registrado: ${convertEmailToName(newEmail)}`);
+            this.reset();
+            renderAdminUserList();
+        });
+
+        window.adminDeleteUser = function(emailTarget) {
+            if (confirm(`Remover definitivamente a conta de ${convertEmailToName(emailTarget)}?`)) {
+                const users = JSON.parse(localStorage.getItem('edu_users'));
+                delete users[emailTarget];
+                localStorage.setItem('edu_users', JSON.stringify(users));
+                renderAdminUserList();
+            }
+        }
+
+        /* --- LÓGICA DA TELA DO PROFESSOR --- */
+        function showTeacherPanel() {
+            document.getElementById('teacher-screen').classList.remove('hidden');
+            document.getElementById('teacher-name').innerText = sessionUser.name;
+            document.getElementById('teacher-email').innerText = sessionUser.email;
+            document.getElementById('teacher-avatar').innerText = sessionUser.name.charAt(0);
+            
+            populateStudentsDropdown();
+        }
+
+        function populateStudentsDropdown() {
+            const select = document.getElementById('select-student');
+            select.innerHTML = '<option value="">Selecione o Aluno...</option>';
+            const users = JSON.parse(localStorage.getItem('edu_users'));
+
+            for (let email in users) {
+                if (users[email].role === 'student') {
+                    select.innerHTML += `<option value="${email}">${convertEmailToName(email)} (${users[email].balance} pts)</option>`;
+                }
+            }
+        }
+
+        document.getElementById('transfer-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const targetStudent = document.getElementById('select-student').value;
+            const amount = parseInt(document.getElementById('points-amount').value);
+            const reason = document.getElementById('transfer-reason').value;
+
+            const users = JSON.parse(localStorage.getItem('edu_users'));
+            const history = JSON.parse(localStorage.getItem('edu_history'));
+
+            users[targetStudent].balance += amount;
+
+            const now = new Date();
+            const timestamp = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth()+1).toString().padStart(2, '0')} às ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+
+            history.push({
+                to: targetStudent,
+                from: sessionUser.name,
+                amount: amount,
+                reason: reason,
+                date: timestamp
+            });
+
+            localStorage.setItem('edu_users', JSON.stringify(users));
+            localStorage.setItem('edu_history', JSON.stringify(history));
+
+            alert(`Sucesso! ${amount} pontos atribuídos para ${convertEmailToName(targetStudent)}.`);
+            this.reset();
+            populateStudentsDropdown();
+        });
+
+        /* --- LÓGICA DA TELA DO ALUNO --- */
+        function showStudentPanel() {
+            document.getElementById('student-screen').classList.remove('hidden');
+            document.getElementById('student-name').innerText = sessionUser.name;
+            document.getElementById('student-email').innerText = sessionUser.email;
+            document.getElementById('student-avatar').innerText = sessionUser.name.charAt(0);
+            
+            renderStudentStatement();
+        }
+
+        function renderStudentStatement() {
+            const users = JSON.parse(localStorage.getItem('edu_users'));
+            const history = JSON.parse(localStorage.getItem('edu_history'));
+
+            document.getElementById('student-balance').innerText = `${users[sessionUser.email].balance} pts`;
+
+            const list = document.getElementById('student-history-list');
+            list.innerHTML = '';
+
+            const myHistory = history.filter(item => item.to === sessionUser.email);
+
+            if (myHistory.length === 0) {
+                list.innerHTML = '<li class="list-item">Nenhum ponto recebido neste período.</li>';
+                return;
+            }
+
+            myHistory.reverse().forEach(item => {
+                list.innerHTML += `
+                    <li class="list-item">
+                        <div>
+                            <strong style="color:var(--success)">+${item.amount} pts</strong> lançado por ${item.from}<br>
+                            <small style="color:#64748b;">Motivo: ${item.reason}</small>
+                        </div>
+                        <div style="font-size:0.8rem; color:#64748b;">${item.date}</div>
+                    </li>
+                `;
+            });
+        }
+
+        // LOGOUT
+        function logout() {
+            sessionUser = null;
+            document.getElementById('admin-screen').classList.add('hidden');
+            document.getElementById('teacher-screen').classList.add('hidden');
+            document.getElementById('student-screen').classList.add('hidden');
+            document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('login-form').reset();
+        }
+    </script>
+</body>
+</html>
